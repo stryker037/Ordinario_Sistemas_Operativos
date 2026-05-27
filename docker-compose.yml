@@ -1,0 +1,62 @@
+# Archivo para realizar la orquestración de los contenedores
+
+# Version del docker compose
+version: '3.8'
+
+# Lista de todos los servicios
+services:
+  # Servicio de Base de Datos (MariaDB)
+  database:
+    image: mariadb:10.6
+    container_name: teamtasks_database
+    # Para reiniciar la máquina en caso de que haya algun error
+    restart: always
+    # guarda las variables env en el sistema
+    env_file: .env
+    # define las variables de entorno
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    # conecta el volumen de mariadb_data con el directorio de la base de datos
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      # Copia init.sql al directorio de inicialización de MariaDB para que se ejecute en el primer arranque
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Para permitir la comunicación entre las distintas aplicaciones de contenedores
+    networks:
+      - app-network
+
+  # Servicio de Backend (API en Python Flask)
+  backend:
+    build: ./backend
+    container_name: teamtasks_backend
+    restart: always
+    ports:
+      - "${BACKEND_PORT}:5000"
+    env_file: .env
+    depends_on:
+      - database
+    networks:
+      - app-network
+
+  # Servicio de Frontend (Servidor Web en Node.js)
+  frontend:
+    build: ./frontend
+    container_name: teamtasks_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    env_file: .env
+    networks:
+      - app-network
+
+# Crea el volumen persistente para la base de datos
+volumes:
+  mariadb_data:
+
+# Red puente personalizada para comunicar los servicios
+networks:
+  app-network:
+    driver: bridge
