@@ -22,15 +22,14 @@ docker compose up -d
 ```
 *El parámetro `-d` levanta los contenedores en modo detached (segundo plano).*
 
-
-### Paso 2: Verificar el Estado del Despliegue
+### Paso 2: Verificar el Estado del Despliegue (OPCIONAL)
 Verifica que los tres contenedores estén corriendo de forma correcta:
 ```bash
 docker compose ps
 ```
 Deberías ver listados los contenedores `task_frontend`, `task_backend` y `task_db` en estado **Up**.
 
-### Paso 3: Monitorear Logs (Opcional)
+### Paso 3: Monitorear Logs (OPCIONAL)
 Si deseas comprobar que el backend se conectó correctamente a la base de datos o verificar logs de consola:
 ```bash
 docker compose logs -f backend
@@ -45,13 +44,18 @@ docker compose logs -f backend
    * **Usuario Normal**:
      * **Usuario:** `user1`
      * **Contraseña:** `user123`
+3. Probar la aplicación como administrador y como usuario normal (OPCIONAL)
+   * **Administrador**:
+      * Puedes añadir nuevos usuarios como crear nuevas tareas o modificar el estado de las existentes
+   * **Usuario**:
+      * Puedes modificar el estado de tus tareas asignadas
 
-### Paso 5: Apagar y Limpiar
+### Paso 5: Apagar y Limpiar (OPCIONAL)
 Para detener y eliminar los contenedores sin perder la información guardada:
 ```bash
 docker compose down
 ```
-*Gracias al volumen mapeado en el archivo `docker-compose.yml`, los datos y tareas que hayas creado persistirán incluso si apagas o eliminas los contenedores.*
+*Gracias al volumen mapeado en el archivo `docker-compose.yml`, los datos y tareas que hayas creado persistirán incluso si apagas o eliminas los contenedores. En caso de querer eliminar los volúmenes creados, utiliza el comando `docker compose down -v`*
 
 ---
 
@@ -60,37 +64,25 @@ docker compose down
 El proyecto implementa una arquitectura desacoplada de 3 capas (Three-Tier Architecture) completamente containerizada mediante contenedores independientes de Docker coordinados por Docker Compose:
 
 1. **frontend**:
-   - Capa de Presentación / Frontend (Node.js & Express)
-   - Contenedor que ejecuta un servidor web ligero con Node.js.
+   - Frontend hecho en Node.js
    - Tiene dentro su propio `dockerfile`
-   - Sirve archivos estáticos (HTML, CSS minimalista moderno y JavaScript del lado del cliente).
+   - Sirve archivos estáticos (HTML, CSS y JavaScript del lado del cliente).
    - Se comunica con el backend mediante peticiones HTTP asíncronas (Fetch API) enviando y recibiendo datos estructurados en formato JSON.
    
 2. **backend**:
-   - Capa de Lógica de Negocio / Backend (Python & Flask)
-   - Contenedor con una API RESTful desarrollada en Flask.
+   - Backend hecho con Python & Flask
    - Tiene dentro su propio `dockerfile`
    - Actúa como intermediario seguro entre la interfaz del usuario y la base de datos (evitando que el frontend se conecte directamente a MariaDB).
    - Procesa la lógica de autenticación (Login), filtrado de tareas por rol (Admin vs Normal) y registro de recursos.
    
 3. **database**:
-   - Capa de Datos / Database (MariaDB)
-   - Contenedor oficial de MariaDB que almacena la información persistente.
+   - Base de datos MariaDB
+   - Contenedor oficial que almacena la información persistente.
    - Contiene la estructura relacional de usuarios y tareas (`users` y `tasks`).
    - Se alimenta inicialmente mediante el script SQL ubicado en `database/init.sql` durante el primer arranque.
 
-4. **evidencias**
-   - Carpeta donde se encuentran las evidencias sobre el uso correcto del cli
-   - Dentro se encuentra un archivo pdf que muestra el paso a paso para levantar el contenedor
-   - Igualmente demuestra todos los puntos de las instrucciones del ordinario
-
-5. **docker-compose**
+4. **docker-compose**
    - Archivo donde se encuentran los servicios a levantar con el comando docker compose up -d
-
-6. **misc**
-   - Carpeta donde se encuentran las instrucciones del proyecto ordinario
-   - Igualmente se encuentran unas notas de como elaborar el ordinario
-   - Finalmente se encuentra un archivo docx mostrando el paso a paso para construir el ordinario
 
 ### Flujo de Comunicación y Redes
 
